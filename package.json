@@ -1,0 +1,51 @@
+{
+	"name": "@micrio/client-react",
+	"version": "0.0.1",
+	"description": "Wrapper for the Micrio client library for React.",
+	"main": "dist/index.cjs.js",
+	"module": "dist/index.esm.js",
+	"types": "dist/index.d.ts",
+	"type": "module",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "vite build && tsc --emitDeclarationOnly --outDir dist",
+		"dev": "vite --port 2000",
+		"test": "jest",
+		"typecheck": "tsc --noEmit"
+	},
+	"keywords": [
+		"micrio",
+		"react"
+	],
+	"engines": {
+		"node": ">=18.17.0"
+	},
+	"engineStrict": true,
+	"author": "Marcel Duin <marcel@micr.io>",
+	"homepage": "https://micr.io/",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Q42/Micrio.ClientReact.git"
+	},
+	"license": "MIT",
+	"peerDependencies": {
+		"react": "^17.0.0 || ^18.0.0",
+		"react-dom": "^17.0.0 || ^18.0.0"
+	},
+	"dependencies": {
+		"@micrio/client": "^5.3.1"
+	},
+	"devDependencies": {
+		"@testing-library/react": "^16.0.0",
+		"@types/node": "^22.14.1",
+		"@types/react": "^18.3.3",
+		"@types/react-dom": "^18.3.0",
+		"@vitejs/plugin-react": "^4.3.1",
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1",
+		"typescript": "^5.5.4",
+		"vite": "^5.4.10"
+	}
+}
