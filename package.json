@@ -13,7 +13,9 @@
 		"build": "vite build && tsc --emitDeclarationOnly --outDir dist",
 		"dev": "vite --port 2000",
 		"test": "jest",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"prepublish": "npm run build",
+		"prepack": "npm run build"
 	},
 	"keywords": [
 		"micrio",

@@ -1,115 +1,75 @@
-import React, { useRef, useEffect, type HTMLAttributes } from 'react';
-// Assuming types are exported under 'Models' based on user feedback
-import type { HTMLMicrioElement } from '@micrio/client';
-import '@micrio/client'; // Import to register the <micr-io> custom element
-import { CustomAttributeProps, EventProps, micrioCustomAttributes, micrioEventTypes, MicrioProps } from './types';
-
-// --- Helper Functions ---
-const camelToKebab = (str: string): string =>
-  str.replace(/([A-Z])/g, (g) => `-${g[0].toLowerCase()}`);
-
-const kebabToCamel = (str: string): string =>
-  str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
-
-const eventPropToKebabMap = Object.fromEntries(
-  micrioEventTypes.map((e) => [`on${e.charAt(0).toUpperCase() + kebabToCamel(e.slice(1))}`, e]),
-) as Record<string, string>;
-
-const attributePropToKebabMap = Object.fromEntries(
-  micrioCustomAttributes.map((a) => [kebabToCamel(a), a]),
-) as Record<string, string>;
-
-// --- Type Definitions ---
+import React, { useRef, useEffect, type HTMLAttributes, useMemo } from 'react';
+import type { HTMLMicrioElement, Models } from '@micrio/client';
+import '@micrio/client'; // This import will ensure the custom element is registered
+import { CustomAttributeProps, EventProps, MicrioProps } from './types';
+import { attributePropToKebabMap, eventPropToKebabMap } from './utils';
 
 const Micrio: React.FC<MicrioProps> = ({ children, ...props }) => {
   const micrioRef = useRef<HTMLMicrioElement>(null);
-  // Store handlers in ref to avoid re-running effect on handler change
-  const eventHandlersRef = useRef<EventProps>({});
+  const eventHandlersRef = useRef<Record<string, (evt: CustomEvent) => any>>({});
 
-  // Keep event handlers ref updated
-  useEffect(() => {
-    eventHandlersRef.current = Object.keys(eventPropToKebabMap).reduce((acc, propKey) => {
-      const key = propKey as keyof EventProps;
-      if (props[key]) {
-        // Cast to any to resolve complex intersection type assignment error
-        acc[key] = props[key] as any;
-      }
-      return acc;
-    }, {} as EventProps);
-  }, [props]); // Re-run only if props themselves change
-
-  // --- Attribute Synchronization ---
+  // Attribute synchronization to the kebab-case attributes of the custom element
+  // TODO: in reality Micrio doesn't watch most attributes for changes, so we need to either watch them all
+  // or communicate clearly that you can only set most attributes at initial render and that they won't change after that.
   useEffect(() => {
     const element = micrioRef.current;
     if (!element) return;
 
+    const existingAttributes = element.getAttributeNames();
+
     // Iterate over the defined attribute props
     Object.entries(attributePropToKebabMap).forEach(([propKey, attrKey]) => {
       const value = props[propKey as keyof CustomAttributeProps];
-      const attrKeyString = attrKey as string; // Ensure string type for DOM methods
-
-      // Handle boolean attributes (presence means true)
-      if (typeof value === 'boolean') {
-        if (value) {
-          element.setAttribute(attrKeyString, '');
-        } else {
-          element.removeAttribute(attrKeyString);
-        }
-      } else if (value !== undefined && value !== null) {
+      if (value !== undefined && value !== null) {
         // Handle other types (convert to string, handle arrays/objects if needed)
-        const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
-        element.setAttribute(attrKeyString, stringValue);
-      } else {
+        // (booleans are also set as a string "true" or "false", because micrio has boolean attributes that are false by default)
+        const stringValue = typeof value === 'object' 
+          ? JSON.stringify(value)
+          : String(value);
+        element.setAttribute(attrKey, stringValue);
+      } else if (existingAttributes.includes(attrKey)) {
         // Remove attribute if prop is undefined or null
-        element.removeAttribute(attrKeyString);
+        element.removeAttribute(attrKey);
       }
     });
   }, [props]); // Re-run if attribute props change
 
-  // --- Event Listener Management ---
+  // Adding event listeners to the custom element for each event prop that was passed
   useEffect(() => {
     const element = micrioRef.current;
     if (!element) return;
 
     // Store listeners added in this effect run for cleanup
-    const addedListeners: { [key: string]: EventListener } = {};
+    const addedListeners: Record<string, (evt: CustomEvent) => any> = {};
 
     // Iterate over the defined event props
     Object.entries(eventPropToKebabMap).forEach(([propKey, eventKey]) => {
-      const handler = eventHandlersRef.current[propKey as keyof EventProps];
-      const eventKeyString = eventKey as string; // Ensure string type for DOM methods
+      const handler = props[propKey as keyof EventProps];
 
-      if (handler) {
-        const listener = (event: Event) => {
-          // Call the latest handler from the ref
-          const currentHandler = eventHandlersRef.current[propKey as keyof EventProps];
-          if (currentHandler) {
-            // Cast handler to any before calling to bypass strict intersection check
-            (currentHandler as any)(event as CustomEvent<any>);
-          }
-        };
-        addedListeners[eventKeyString] = listener; // Use string key for index
-        element.addEventListener(eventKeyString, listener);
+      if (handler && eventHandlersRef.current[eventKey] !== handler) {
+        addedListeners[eventKey] = handler;
+        element.addEventListener(eventKey as any, handler);
+        eventHandlersRef.current[eventKey] = handler; // Store the current handler for comparison
+      } else if (!handler && eventHandlersRef.current[eventKey]) {
+        // If the handler is now undefined, remove the existing listener
+        const preExistingListener = eventHandlersRef.current[eventKey];
+        element.removeEventListener(eventKey as any, preExistingListener);
+        delete eventHandlersRef.current[eventKey]; // Clean up the stored handler
       }
     });
 
-    // Cleanup function
     return () => {
       if (!element) return;
-      Object.entries(addedListeners).forEach(([eventKeyString, listener]) => {
-        element.removeEventListener(eventKeyString, listener); // Use string key
+      Object.entries(addedListeners).forEach(([eventKey, listener]) => {
+        element.removeEventListener(eventKey as any, listener);
       });
     };
-  }, []); // Run only once on mount to set up listeners
+  }, [props]);
 
   // Separate standard HTML props from our custom/mapped props
   const standardHtmlProps: HTMLAttributes<HTMLElement> = {};
   for (const key in props) {
-    if (
-      !attributePropToKebabMap.hasOwnProperty(key) &&
-      !eventPropToKebabMap.hasOwnProperty(key) &&
-      key !== 'children'
-    ) {
+    if (!attributePropToKebabMap.hasOwnProperty(key) && !eventPropToKebabMap.hasOwnProperty(key)) {
       standardHtmlProps[key as keyof HTMLAttributes<HTMLElement>] = props[key as keyof typeof props];
     }
   }
