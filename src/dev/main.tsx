@@ -1,9 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import Micrio from '..';
+import { Micrio } from '..';
+import { HTMLMicrioElement } from '@micrio/client';
 
 const App = () => {
   const [turnOnPanStartAndSocial, setTurnOnPanStartAndSocial] = React.useState(false);
+
+  const micrioRef = React.useRef<HTMLMicrioElement>(null);
+
+  useEffect(() => {
+    console.log('Micrio ref:', micrioRef.current);
+  }, []);
 
   return (
     <div>
@@ -14,6 +21,7 @@ const App = () => {
         dataSocial={turnOnPanStartAndSocial ? true : false}
         onPanstart={turnOnPanStartAndSocial ? e => console.log('Panstart event triggered:', e) : undefined}
         dataLogo={false}
+        ref={micrioRef}
       />
       <button onClick={() => setTurnOnPanStartAndSocial(!turnOnPanStartAndSocial)} style={{ position: 'absolute', bottom: 72, left: 24 }}>
         {turnOnPanStartAndSocial ? 'Turn Off Panstart and Logo' : 'Turn On Panstart and Logo'}

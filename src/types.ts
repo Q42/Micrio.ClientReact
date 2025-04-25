@@ -27,4 +27,9 @@ export type CustomAttributeProps = { [K in keyof Models.Attributes.MicrioCustomA
 export type EventProps = { [K in keyof Models.MicrioEventDetails as `on${Capitalize<KebabToCamel<K>>}`]?: (event: CustomEvent<Models.MicrioEventDetails[K]>) => any };
 
 // Combine with standard HTML attributes, excluding potential overlaps (id and lang)
-export interface MicrioProps extends Omit<HTMLAttributes<HTMLElement>, keyof EventProps | 'lang'>, CustomAttributeProps, EventProps {}
+export interface MicrioProps extends
+  Omit<HTMLAttributes<HTMLElement>, keyof EventProps | 'lang'>,
+  CustomAttributeProps, 
+  EventProps {
+    ref?: React.RefObject<HTMLMicrioElement>;
+  }
