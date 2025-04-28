@@ -4,7 +4,7 @@ import { Micrio } from '..';
 import { HTMLMicrioElement } from '@micrio/client';
 
 const App = () => {
-	const [turnOnPanStartAndSocial, setTurnOnPanStartAndSocial] = React.useState(false);
+	const [turnOnPanStart, setTurnOnPanStart] = React.useState(false);
 
 	const micrioRef = React.useRef<HTMLMicrioElement>(null);
 
@@ -18,13 +18,13 @@ const App = () => {
 				id="dzzLm"
 				style={{ margin: 0, padding: 0, width: '100%', height: '100vh', backgroundColor: 'black' }}
 				onZoom={e => console.log('Zoom event triggered:', e)}
-				dataSocial={turnOnPanStartAndSocial ? true : false}
-				onPanstart={turnOnPanStartAndSocial ? e => console.log('Panstart event triggered:', e) : undefined}
-				dataLogo={false}
+				dataSocial={false}
+				onPanstart={turnOnPanStart ? e => console.log('Panstart event triggered:', e) : undefined}
+				dataLogo={true}
 				ref={micrioRef}
 			/>
-			<button onClick={() => setTurnOnPanStartAndSocial(!turnOnPanStartAndSocial)} style={{ position: 'absolute', bottom: 72, left: 24 }}>
-				{turnOnPanStartAndSocial ? 'Turn Off Panstart and Logo' : 'Turn On Panstart and Logo'}
+			<button onClick={() => setTurnOnPanStart(!turnOnPanStart)} style={{ position: 'absolute', bottom: 72, left: 24 }}>
+				{turnOnPanStart ? 'Turn Off Panstart' : 'Turn On Panstart'}
 			</button>
 		</div>
 	);
