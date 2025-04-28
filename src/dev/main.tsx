@@ -4,30 +4,30 @@ import { Micrio } from '..';
 import { HTMLMicrioElement } from '@micrio/client';
 
 const App = () => {
-  const [turnOnPanStartAndSocial, setTurnOnPanStartAndSocial] = React.useState(false);
+	const [turnOnPanStartAndSocial, setTurnOnPanStartAndSocial] = React.useState(false);
 
-  const micrioRef = React.useRef<HTMLMicrioElement>(null);
+	const micrioRef = React.useRef<HTMLMicrioElement>(null);
 
-  useEffect(() => {
-    console.log('Micrio ref:', micrioRef.current);
-  }, []);
+	useEffect(() => {
+		console.log('Micrio ref:', micrioRef.current);
+	}, []);
 
-  return (
-    <div>
-      <Micrio
-        id="dzzLm"
-        style={{ margin: 0, padding: 0, width: '100%', height: '100vh', backgroundColor: 'black' }}
-        onZoom={e => console.log('Zoom event triggered:', e)}
-        dataSocial={turnOnPanStartAndSocial ? true : false}
-        onPanstart={turnOnPanStartAndSocial ? e => console.log('Panstart event triggered:', e) : undefined}
-        dataLogo={false}
-        ref={micrioRef}
-      />
-      <button onClick={() => setTurnOnPanStartAndSocial(!turnOnPanStartAndSocial)} style={{ position: 'absolute', bottom: 72, left: 24 }}>
-        {turnOnPanStartAndSocial ? 'Turn Off Panstart and Logo' : 'Turn On Panstart and Logo'}
-      </button>
-    </div>
-  );
+	return (
+		<div>
+			<Micrio
+				id="dzzLm"
+				style={{ margin: 0, padding: 0, width: '100%', height: '100vh', backgroundColor: 'black' }}
+				onZoom={e => console.log('Zoom event triggered:', e)}
+				dataSocial={turnOnPanStartAndSocial ? true : false}
+				onPanstart={turnOnPanStartAndSocial ? e => console.log('Panstart event triggered:', e) : undefined}
+				dataLogo={false}
+				ref={micrioRef}
+			/>
+			<button onClick={() => setTurnOnPanStartAndSocial(!turnOnPanStartAndSocial)} style={{ position: 'absolute', bottom: 72, left: 24 }}>
+				{turnOnPanStartAndSocial ? 'Turn Off Panstart and Logo' : 'Turn On Panstart and Logo'}
+			</button>
+		</div>
+	);
 };
 
 createRoot(document.getElementById('root')!).render(<App />);
