@@ -17,7 +17,12 @@ const App = () => {
 			<Micrio
 				id="dzzLm"
 				style={{ margin: 0, padding: 0, width: '100%', height: '100vh', backgroundColor: 'black' }}
+				className="my-micrio-class"
 				onZoom={e => console.log('Zoom event triggered:', e)}
+				onShow={e => {
+					const micrioInstance = e.detail;
+					console.log('Micrio show', micrioInstance.$current?.camera.flyToCoo([0.5, 0.5]))
+				}}
 				dataSocial={false}
 				onPanstart={turnOnPanStart ? e => console.log('Panstart event triggered:', e) : undefined}
 				dataLogo={true}
