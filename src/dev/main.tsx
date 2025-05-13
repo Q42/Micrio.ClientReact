@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Micrio } from '..';
+import { Micrio } from '../Micrio';
 import { HTMLMicrioElement } from '@micrio/client';
 
 const App = () => {
